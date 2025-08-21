@@ -17,6 +17,7 @@ export const useXMPPClient = ({ jid, password }: XMPPClientProps) => {
   const { addMessage, currentOpenChatJid } = useContext(MessageContext);
   const { setClient } = useContext(ClientContext);
   const ip = Config.XMPP_HOST;
+
   // To avoid stale closures
   const openChatRef = useRef(currentOpenChatJid);
   const addMessageRef = useRef(addMessage);
@@ -38,7 +39,7 @@ export const useXMPPClient = ({ jid, password }: XMPPClientProps) => {
         bosh: false,
       },
     });
-
+    console.log({ client });
     setClient(client);
 
     client.on("session:started", () => {
