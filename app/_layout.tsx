@@ -1,3 +1,7 @@
+import { AuthContext } from "@/context/AuthContext";
+import { ClientContext } from "@/context/clientContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useColorScheme } from "@/hooks/useColorScheme";
 import {
   DarkTheme,
   DefaultTheme,
@@ -5,16 +9,17 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
+import { useState } from "react";
+import "react-native-get-random-values";
 import "react-native-reanimated";
-
-import { AuthContext } from "@/context/userContext";
-import { useAuth } from "@/hooks/useAuth";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { Agent } from "stanza";
 import Login from "./login";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const authState = useAuth();
+  const [client, setClient] = useState<Agent | null>(null);
+
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
@@ -27,7 +32,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <AuthContext.Provider value={authState}>
-        {authState.isLoggedIn ? <RootLayoutNav /> : <Login />}
+        <ClientContext.Provider value={{ client, setClient }}>
+          {authState.isLoggedIn ? <RootLayoutNav /> : <Login />}
+        </ClientContext.Provider>
       </AuthContext.Provider>
     </ThemeProvider>
   );

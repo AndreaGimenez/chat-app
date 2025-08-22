@@ -1,6 +1,7 @@
-import { FC, useCallback, useState } from "react";
+import { useXMPPClient } from "@/hooks/useXMPPClient";
+import { useRouter } from "expo-router";
+import { FC, useCallback, useEffect, useState } from "react";
 import { Button, StyleSheet, Text, TextInput, View } from "react-native";
-import { useXMPPClient } from "../hooks/useXMPPClient";
 
 //Currently we are not using this screen
 
@@ -8,22 +9,32 @@ const LoginScreen: FC = () => {
   const [jid, setJid] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
+  const [credentials, setCredentials] = useState<{
+    jid: string;
+    password: string;
+  }>({ jid: "", password: "" });
+  const router = useRouter();
+  console.log({ credentials });
+  const { connected, badCredentials } = useXMPPClient({
+    credentials: { jid, password },
+  });
 
   const handleLogin = useCallback(() => {
     if (!jid || !password) {
       setStatus("Please fill both fields");
       return;
     }
-    try {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      useXMPPClient({
-        jid: `${jid}/rnclient`,
-        password,
-      });
-    } catch (e) {
-      console.log({ e });
-    }
+    setCredentials({ jid, password });
   }, [jid, password]);
+
+  useEffect(() => {
+    if (badCredentials) {
+      setStatus("Username or password not correct");
+    }
+    if (connected) {
+      router.navigate("/(tabs)");
+    }
+  }, [badCredentials, connected, router]);
 
   return (
     <View style={styles.container}>

@@ -1,4 +1,5 @@
 import { parseJid } from "@/assets/utils";
+import { AuthContext } from "@/context/AuthContext";
 import { ClientContext } from "@/context/clientContext";
 import { MessageContext } from "@/context/messageContext";
 import { notifyNewMessage } from "@/notifications/send";
@@ -6,17 +7,24 @@ import { useContext, useEffect, useRef, useState } from "react";
 import Config from "react-native-config";
 import { IMessage } from "react-native-gifted-chat";
 import { createClient } from "stanza";
+const ip = Config.XMPP_HOST;
 
 interface XMPPClientProps {
-  jid: string;
-  password: string;
+  credentials: {
+    jid?: string;
+    password?: string;
+  };
 }
 
-export const useXMPPClient = ({ jid, password }: XMPPClientProps) => {
+export const useXMPPClient = ({
+  credentials,
+}: XMPPClientProps): { connected: boolean; badCredentials: boolean } => {
+  const { jid, password } = credentials;
   const [connected, setConnected] = useState(false);
+  const [badCredentials, setBadCredentials] = useState(false);
   const { addMessage, currentOpenChatJid } = useContext(MessageContext);
+  const authState = useContext(AuthContext);
   const { setClient } = useContext(ClientContext);
-  const ip = Config.XMPP_HOST;
 
   // To avoid stale closures
   const openChatRef = useRef(currentOpenChatJid);
@@ -30,6 +38,7 @@ export const useXMPPClient = ({ jid, password }: XMPPClientProps) => {
 
   useEffect(() => {
     if (!jid || !password) return;
+
     const client = createClient({
       jid,
       password,
@@ -39,12 +48,13 @@ export const useXMPPClient = ({ jid, password }: XMPPClientProps) => {
         bosh: false,
       },
     });
-    console.log({ client });
+
     setClient(client);
 
     client.on("session:started", () => {
       client.sendPresence();
       setConnected(true);
+      authState?.login();
     });
 
     client.on("disconnected", () => {
@@ -75,12 +85,18 @@ export const useXMPPClient = ({ jid, password }: XMPPClientProps) => {
       }
     });
 
+    client.on("auth:failed", () => {
+      setBadCredentials(true);
+      console.log("❌ Authentication failed (bad credentials)");
+    });
+
     client.connect();
 
     return () => {
       client.disconnect();
       setConnected(false);
     };
-  }, [jid, password, ip, setClient]);
-  return { connected };
+  }, [jid, password, setClient, authState?.login]);
+
+  return { connected, badCredentials };
 };
