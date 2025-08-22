@@ -36,6 +36,8 @@ export const useXMPPClient = ({
     addMessageRef.current = addMessage;
   }, [currentOpenChatJid, addMessage]);
 
+  const login = authState?.login;
+
   useEffect(() => {
     if (!jid || !password) return;
 
@@ -54,7 +56,7 @@ export const useXMPPClient = ({
     client.on("session:started", () => {
       client.sendPresence();
       setConnected(true);
-      authState?.login();
+      login && login();
     });
 
     client.on("disconnected", () => {
@@ -96,7 +98,7 @@ export const useXMPPClient = ({
       client.disconnect();
       setConnected(false);
     };
-  }, [jid, password, setClient, authState?.login]);
+  }, [jid, password, setClient, login]);
 
   return { connected, badCredentials };
 };
