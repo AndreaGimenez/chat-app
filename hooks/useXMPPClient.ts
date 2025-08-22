@@ -24,7 +24,7 @@ export const useXMPPClient = ({
   const [badCredentials, setBadCredentials] = useState(false);
   const { addMessage, currentOpenChatJid } = useContext(MessageContext);
   const authState = useContext(AuthContext);
-  const { setClient } = useContext(ClientContext);
+  const { setClient, setRoster } = useContext(ClientContext);
 
   // To avoid stale closures
   const openChatRef = useRef(currentOpenChatJid);
@@ -53,10 +53,17 @@ export const useXMPPClient = ({
 
     setClient(client);
 
-    client.on("session:started", () => {
-      client.sendPresence();
-      setConnected(true);
-      login && login();
+    client.on("session:started", async () => {
+      try {
+        client.sendPresence();
+        setConnected(true);
+        login && login();
+
+        const fetchedRoster = await client.getRoster();
+        setRoster(fetchedRoster);
+      } catch (err) {
+        console.error("❌ Roster fetch failed", err);
+      }
     });
 
     client.on("disconnected", () => {

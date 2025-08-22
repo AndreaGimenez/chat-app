@@ -5,7 +5,6 @@ import { useRouter } from "expo-router";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { RosterResult } from "stanza/protocol";
 type Status = "online" | "offline" | "away";
 
 const statusColors = {
@@ -16,8 +15,7 @@ const statusColors = {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { client, setClient } = useContext(ClientContext);
-  const [roster, setRoster] = useState<RosterResult>();
+  const { client, setClient, roster } = useContext(ClientContext);
   const [presences, setPresences] = useState<Record<string, string>>({});
   const { unread } = useContext(MessageContext);
 
@@ -80,18 +78,6 @@ export default function HomeScreen() {
     };
   }, [client]);
 
-  useEffect(() => {
-    if (!client) return;
-
-    const getRoster = async () => {
-      const fetchedRoster = await client.getRoster();
-      console.log({ fetchedRoster });
-      setRoster(fetchedRoster);
-    };
-
-    getRoster();
-  }, [client]);
-
   const onLogout = useCallback(async () => {
     if (!client) return;
 
@@ -113,7 +99,6 @@ export default function HomeScreen() {
       console.warn("Logout error:", err);
     } finally {
       setPresences({});
-      setRoster(undefined);
       setClient(null);
       router.navigate("/(tabs)");
     }

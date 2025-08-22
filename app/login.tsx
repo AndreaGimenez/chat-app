@@ -9,12 +9,8 @@ const LoginScreen: FC = () => {
   const [jid, setJid] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
-  const [credentials, setCredentials] = useState<{
-    jid: string;
-    password: string;
-  }>({ jid: "", password: "" });
   const router = useRouter();
-  console.log({ credentials });
+
   const { connected, badCredentials } = useXMPPClient({
     credentials: { jid, password },
   });
@@ -24,7 +20,6 @@ const LoginScreen: FC = () => {
       setStatus("Please fill both fields");
       return;
     }
-    setCredentials({ jid, password });
   }, [jid, password]);
 
   useEffect(() => {

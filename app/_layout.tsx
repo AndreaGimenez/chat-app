@@ -13,12 +13,14 @@ import { useState } from "react";
 import "react-native-get-random-values";
 import "react-native-reanimated";
 import { Agent } from "stanza";
+import { RosterResult } from "stanza/protocol";
 import Login from "./login";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const authState = useAuth();
   const [client, setClient] = useState<Agent | null>(null);
+  const [roster, setRoster] = useState<RosterResult>({ items: [] });
 
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
@@ -32,7 +34,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <AuthContext.Provider value={authState}>
-        <ClientContext.Provider value={{ client, setClient }}>
+        <ClientContext.Provider
+          value={{ client, setClient, roster, setRoster }}
+        >
           {authState.isLoggedIn ? <RootLayoutNav /> : <Login />}
         </ClientContext.Provider>
       </AuthContext.Provider>
