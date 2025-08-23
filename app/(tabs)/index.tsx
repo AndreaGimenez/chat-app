@@ -1,3 +1,4 @@
+import { parseJid } from "@/assets/utils";
 import { UserStatusCircle } from "@/components/UserStatusCircle";
 import { ClientContext } from "@/context/clientContext";
 import { MessageContext } from "@/context/messageContext";
@@ -104,10 +105,13 @@ export default function HomeScreen() {
     }
   }, [client]);
 
-  const openChat = useCallback((chatWith: string) => {
-    // router.push(`/chat/${parseJid(chatWith)}`);
-    return;
-  }, []);
+  const openChat = useCallback(
+    (chatWith: string) => {
+      router.push(`/${parseJid(chatWith)}`);
+      return;
+    },
+    [router]
+  );
 
   if (!client) {
     return <Text>no hay client</Text>;
