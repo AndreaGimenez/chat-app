@@ -103,7 +103,7 @@ export default function HomeScreen() {
       setClient(null);
       router.navigate("/(tabs)");
     }
-  }, [client]);
+  }, [client, setClient, router]);
 
   const openChat = useCallback(
     (chatWith: string) => {

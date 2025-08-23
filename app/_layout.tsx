@@ -1,7 +1,9 @@
 import { AuthContext } from "@/context/AuthContext";
 import { ClientContext } from "@/context/clientContext";
+import { MessageContext } from "@/context/messageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { useStateChat } from "@/hooks/useStateChat";
 import {
   DarkTheme,
   DefaultTheme,
@@ -19,6 +21,7 @@ import Login from "./login";
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const authState = useAuth();
+  const chatState = useStateChat();
   const [client, setClient] = useState<Agent | null>(null);
   const [roster, setRoster] = useState<RosterResult>({ items: [] });
 
@@ -37,7 +40,9 @@ export default function RootLayout() {
         <ClientContext.Provider
           value={{ client, setClient, roster, setRoster }}
         >
-          {authState.isLoggedIn ? <RootLayoutNav /> : <Login />}
+          <MessageContext.Provider value={chatState}>
+            {authState.isLoggedIn ? <RootLayoutNav /> : <Login />}
+          </MessageContext.Provider>
         </ClientContext.Provider>
       </AuthContext.Provider>
     </ThemeProvider>
